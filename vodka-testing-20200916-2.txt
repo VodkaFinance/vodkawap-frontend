@@ -1,0 +1,138 @@
+Owner (Account 2): https://rinkeby.etherscan.io/address/0x921eac608217CFc4FeA5C2512Cafd601A68E78b7
+Dev (Account 3): https://rinkeby.etherscan.io/address/0x8De594d73df978fDBcF5057D72Cd326712dc1b36
+VodkaToken: https://rinkeby.etherscan.io/address/0xC3De9117DDB484e0D493509D7eE993a0316eA146
+MasterBartender: https://rinkeby.etherscan.io/address/0x83E413C2039775138670A6AC08206e3DF641dF58
+Uniswap Router02: https://rinkeby.etherscan.io/address/0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+Uniswap Factory: https://rinkeby.etherscan.io/address/0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f
+WETH: https://rinkeby.etherscan.io/address/0xc778417E063141139Fce010982780140Aa0cD5Ab
+DAI: https://rinkeby.etherscan.io/address/0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa
+USDT 0xd9ba894e0097f8cc2bbc9d24d308b98e36dc6d02
+DAI/WETH UniswapPair: https://rinkeby.etherscan.io/address/0x03E6c12eF405AC3F642B9184eDed8E1322de1a9e
+VODKA/USDT https://rinkeby.etherscan.io/address/0x479c2c03a19ec99eb9c53134df33d5f8f09c2061
+
+-----------------------------------------------------------------------------------------------------
+
+1. деплой водка токена
+
+-> 0x921eac608217CFc4FeA5C2512Cafd601A68E78b7: create VodkaToken()
+
+https://rinkeby.etherscan.io/tx/0x8467422ed247b61cfac72e07e1dbf66937ce48950faaf654d712c41466dc81f0
+
+<- VodkaToken: 0xC3De9117DDB484e0D493509D7eE993a0316eA146
+
+(анонимность - торнадо кеш)
+
+!!! подпись в верификации эфирскана токена до передачи прав мастершефа
+
+-----------------------------------------------------------------------------------------------------
+
+2. деплой мастер шефа
+
+-> 0x921eac608217CFc4FeA5C2512Cafd601A68E78b7: create MasterBartender(
+    _vodka: 0xC3De9117DDB484e0D493509D7eE993a0316eA146
+    _devaddr: 0x8De594d73df978fDBcF5057D72Cd326712dc1b36
+    _vodkaPerBlock: 100000000000000000000
+    _startBlock: 7203052
+    _bonusEndBlock: 8000000)
+
+https://rinkeby.etherscan.io/tx/0xd9ce1ff802575c92528fdd6899e95a71162d30f47014387d2d1bd8d7bb2e4e0e
+
+<- MasterBartender: 0x83E413C2039775138670A6AC08206e3DF641dF58
+
+-----------------------------------------------------------------------------------------------------
+
+3. Передача суши мастершефа оунером в токен
+
+-> 0x921eac608217CFc4FeA5C2512Cafd601A68E78b7: VodkaToken[0xC3De9117DDB484e0D493509D7eE993a0316eA146].transferOwnership(
+    0x83E413C2039775138670A6AC08206e3DF641dF58)
+
+https://rinkeby.etherscan.io/tx/0x20d32aa28790e0db6f232fc0aba441dcd8c5dadbe6fc6b29fa6c242d8a811cd0
+
+-----------------------------------------------------------------------------------------------------
+
+4. Получение в роутере адерс эфира и фектори
+
+Uniswap Router02: https://rinkeby.etherscan.io/address/0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+
+-> WETH: 0xc778417E063141139Fce010982780140Aa0cD5Ab
+-> factory: 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f
+
+-----------------------------------------------------------------------------------------------------
+
+5. создаем пару
+
+-> 0x921eac608217CFc4FeA5C2512Cafd601A68E78b7: UniswapFactory[0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f].createPair(
+    tokenA: 0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa,
+    tokenB: 0xc778417E063141139Fce010982780140Aa0cD5Ab)
+
+https://etherscan.io/tx/0x3d68b0d8a94838af33070b8f00558e723f073b23772bd1760f1f4032e21e0fb3
+
+<- UniswapV2Pair: 0x03E6c12eF405AC3F642B9184eDed8E1322de1a9e
+
+-----------------------------------------------------------------------------------------------------
+
+6. добавляем пару в мастер шеф (что такое аллокпойнт?), айди пары с 0 
+
+-> 0x921eac608217CFc4FeA5C2512Cafd601A68E78b7: MasterBartender[0x83E413C2039775138670A6AC08206e3DF641dF58].add(
+    _allocPoint: 100,
+    _lpToken: 0x03E6c12eF405AC3F642B9184eDed8E1322de1a9e,
+    _withUpdate: 1)
+
+https://rinkeby.etherscan.io/tx/0xe306f0d5358a8f7db50d0106649b726428c57c05ec0b4ff742ade2bdc672048d
+
+// Создалась пара номер 0, далее в 8 пункте этот ноль передаётся в параметре _pid
+
+-----------------------------------------------------------------------------------------------------
+
+7. разрешаем на контракте пары потратить лп токены в адрес контракта мастершефа
+
+-> 0x921eac608217CFc4FeA5C2512Cafd601A68E78b7: DAI/WETH UniswapPair[0x03E6c12eF405AC3F642B9184eDed8E1322de1a9e].approve(
+    spender: 0x83E413C2039775138670A6AC08206e3DF641dF58,
+    value: 100000000000000000000)
+
+https://rinkeby.etherscan.io/tx/0x219d18e95acb5b03a700f7033369a26cd70b11ebc694f0c08d1e74a911f1017a
+
+-----------------------------------------------------------------------------------------------------
+
+8. депозит на мастершеф
+
+-> MasterBartender[0x83E413C2039775138670A6AC08206e3DF641dF58].deposit(
+    _pid: 0,
+    _amount: 100000000000000000000)
+
+https://rinkeby.etherscan.io/tx/0x2cc8767a40309eb5b575117eb0d90948936499573722d6733efd48cf78512047
+
+-----------------------------------------------------------------------------------------------------
+
+0x921eac608217CFc4FeA5C2512Cafd601A68E78b7
+    46.3797 ETH
+    238561.567 DAI
+    795.167 UNI-V2
+    0 VODKA
+
+0x8De594d73df978fDBcF5057D72Cd326712dc1b36
+    0 ETH
+    0 VODKA
+
+-----------------------------------------------------------------------------------------------------
+
+9. вывод лп токенов
+
+-> MasterBartender[0x83E413C2039775138670A6AC08206e3DF641dF58].withdraw(
+    _pid: 0,
+    _amount: 50000000000000000000)
+
+https://rinkeby.etherscan.io/tx/0x0d2837bf039b8d431ace840382653dae87783d24f21d59dd658b7369d8b339d7
+
+-----------------------------------------------------------------------------------------------------
+
+0x921eac608217CFc4FeA5C2512Cafd601A68E78b7
+    46.3795 ETH
+    238561.567 DAI
+    845.167 UNI-V2
+    1792666.666 VODKA
+
+0x8De594d73df978fDBcF5057D72Cd326712dc1b36 дев пул
+    0 ETH
+    268900 VODKA
+
